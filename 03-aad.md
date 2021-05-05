@@ -14,8 +14,11 @@ Following the steps below you will result in an Azure AD configuration that will
 | _Additional Security Groups_   | _Optional._ A security group (and its memberships) for the other built-in and custom Kubernetes roles you plan on using. |
 
 ## OCW Team Note:
-- Export Team name:
-> NOTE: This name will be used for naming custom resource groups.
+- Define and Save Team name:
+> NOTE: This name will be used for naming custom resource groups and hence [Azure naming restrictions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules) are applied to the resulting name of the resources. . It is recommeneded to use short and unique environment name with 1-5 characters in length which includes:
+>- a through z (lowercase letters)
+>- 0 through 9 (numbers)
+> 
   ```bash
    export TEAM_NAME=<team_name>
   ```
