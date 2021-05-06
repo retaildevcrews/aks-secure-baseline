@@ -13,6 +13,16 @@ Following the steps below you will result in an Azure AD configuration that will
 | Cluster Admin Group Membership | Association between the Cluster Admin User(s) and the Cluster Admin Security Group. |
 | _Additional Security Groups_   | _Optional._ A security group (and its memberships) for the other built-in and custom Kubernetes roles you plan on using. |
 
+## OCW Team Note:
+- Define and Save Team name:
+> NOTE: This name will be used for naming custom resource groups and hence [Azure naming restrictions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules) are applied to the resulting name of the resources. . It is recommeneded to use short and unique environment name with 1-5 characters in length which includes:
+>- a through z (lowercase letters)
+>- 0 through 9 (numbers)
+> 
+  ```bash
+   export TEAM_NAME=<team_name>
+  ```
+
 ## Steps
 
 > :book: The Contoso Bicycle Azure AD team requires all admin access to AKS clusters be security-group based. This applies to the new Secure AKS cluster that is being built for Application ID a0008 under the BU001 business unit. Kubernetes RBAC will be AAD-backed and access granted based on a user's AAD group membership.
@@ -35,7 +45,7 @@ Following the steps below you will result in an Azure AD configuration that will
    If you already have a security group that is appropriate for your cluster's admin service accounts, use that group and skip this step. If using your own group or your Azure AD administrator created one for you to use; you will need to update the group name throughout the reference implementation.
 
    ```bash
-   export AADOBJECTNAME_GROUP_CLUSTERADMIN=cluster-admins-bu0001a000800
+   export AADOBJECTNAME_GROUP_CLUSTERADMIN=cluster-admins-bu0001a000800-$TEAM_NAME
    export AADOBJECTID_GROUP_CLUSTERADMIN=$(az ad group create --display-name $AADOBJECTNAME_GROUP_CLUSTERADMIN --mail-nickname $AADOBJECTNAME_GROUP_CLUSTERADMIN --description "Principals in this group are cluster admins in the bu0001a000800 cluster." --query objectId -o tsv)
    ```
 
@@ -45,7 +55,7 @@ Following the steps below you will result in an Azure AD configuration that will
 
    ```bash
    export TENANTDOMAIN_K8SRBAC=$(az ad signed-in-user show --query 'userPrincipalName' -o tsv | cut -d '@' -f 2 | sed 's/\"//')
-   export AADOBJECTNAME_USER_CLUSTERADMIN=bu0001a000800-admin
+   export AADOBJECTNAME_USER_CLUSTERADMIN=bu0001a000800-admin-$TEAM_NAME
    export AADOBJECTID_USER_CLUSTERADMIN=$(az ad user create --display-name=${AADOBJECTNAME_USER_CLUSTERADMIN} --user-principal-name ${AADOBJECTNAME_USER_CLUSTERADMIN}@${TENANTDOMAIN_K8SRBAC} --force-change-password-next-login --password ChangeMebu0001a0008AdminChangeMe --query objectId -o tsv)
    ```
 
