@@ -29,7 +29,7 @@ The following two resource groups will be created and populated with networking 
 
 1. Login into the Azure subscription that you'll be deploying into.
 
-   > :book: The networking team logins into the Azure subscription that will contain the regional hub. At Contoso Bicycle, all of their regional hubs are in the same, centrally-managed subscription.
+   > :book: The networking team logins into the Azure subscription that will contain the regional hub. For this exercise, all of the regional hubs are in the same, centrally-managed subscription.
 
    ```bash
    az login -t $TENANTID_AZURERBAC
@@ -41,7 +41,7 @@ The following two resource groups will be created and populated with networking 
 
    ```bash
    # [This takes less than one minute to run.]
-   az group create -n rg-enterprise-networking-hubs-$TEAM_NAME -l centralus
+   az group create -n rg-enterprise-networking-hubs-$TEAM_NAME -l $TEAM_LOCATION
    ```
 
 1. Create the networking spokes resource group.
@@ -50,7 +50,7 @@ The following two resource groups will be created and populated with networking 
 
    ```bash
    # [This takes less than one minute to run.]
-   az group create -n rg-enterprise-networking-spokes-$TEAM_NAME -l centralus
+   az group create -n rg-enterprise-networking-spokes-$TEAM_NAME -l $TEAM_LOCATION
    ```
 
 1. Create the regional network hub.
@@ -63,7 +63,7 @@ The following two resource groups will be created and populated with networking 
 
    ```bash
    # [This takes about five minutes to run.]
-   az deployment group create -g rg-enterprise-networking-hubs-$TEAM_NAME -f networking/hub-default.json -p location=eastus2
+   az deployment group create -g rg-enterprise-networking-hubs-$TEAM_NAME -f networking/hub-default.json -p location=$TEAM_LOCATION
    ```
 
    The hub creation will emit the following:
@@ -78,7 +78,7 @@ The following two resource groups will be created and populated with networking 
    RESOURCEID_VNET_HUB=$(az deployment group show -g rg-enterprise-networking-hubs-$TEAM_NAME -n hub-default --query properties.outputs.hubVnetId.value -o tsv)
 
    # [This takes about five minutes to run.]
-   az deployment group create -g rg-enterprise-networking-spokes-$TEAM_NAME -f networking/spoke-BU0001A0008.json -p location=eastus2 hubVnetResourceId="${RESOURCEID_VNET_HUB}"
+   az deployment group create -g rg-enterprise-networking-spokes-$TEAM_NAME -f networking/spoke-BU0001A0008.json -p location=$TEAM_LOCATION hubVnetResourceId="${RESOURCEID_VNET_HUB}"
    ```
 
    The spoke creation will emit the following:
@@ -95,7 +95,7 @@ The following two resource groups will be created and populated with networking 
    RESOURCEID_SUBNET_NODEPOOLS=$(az deployment group show -g rg-enterprise-networking-spokes-$TEAM_NAME -n spoke-BU0001A0008 --query properties.outputs.nodepoolSubnetResourceIds.value -o tsv)
 
    # [This takes about three minutes to run.]
-   az deployment group create -g rg-enterprise-networking-hubs-$TEAM_NAME -f networking/hub-regionA.json -p location=eastus2 nodepoolSubnetResourceIds="['${RESOURCEID_SUBNET_NODEPOOLS}']"
+   az deployment group create -g rg-enterprise-networking-hubs-$TEAM_NAME -f networking/hub-regionA.json -p location=$TEAM_LOCATION nodepoolSubnetResourceIds="['${RESOURCEID_SUBNET_NODEPOOLS}']"
    ```
 
    > :book: At this point the networking team has delivered a spoke in which BU 0001's app team can lay down their AKS cluster (ID: A0008). The networking team provides the necessary information to the app team for them to reference in their Infrastructure-as-Code artifacts.

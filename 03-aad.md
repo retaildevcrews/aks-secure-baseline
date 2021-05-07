@@ -13,19 +13,25 @@ Following the steps below you will result in an Azure AD configuration that will
 | Cluster Admin Group Membership | Association between the Cluster Admin User(s) and the Cluster Admin Security Group. |
 | _Additional Security Groups_   | _Optional._ A security group (and its memberships) for the other built-in and custom Kubernetes roles you plan on using. |
 
-## OCW Team Note:
-- Define and Save Team name:
-> NOTE: This name will be used for naming custom resource groups and hence [Azure naming restrictions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules) are applied to the resulting name of the resources. . It is recommeneded to use short and unique environment name with 1-5 characters in length which includes:
->- a through z (lowercase letters)
->- 0 through 9 (numbers)
-> 
-  ```bash
-   export TEAM_NAME=<team_name>
-  ```
+## OCW Teams:
+- Define and Save Team name and location:
+   > NOTE: This name will be used for naming custom resource groups and hence [Azure naming restrictions](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-name-rules) are applied to the resulting name of the resources. It is recommeneded to use short and unique environment name with 1-5 characters in length which includes:
+   >- a through z (lowercase letters)
+   >- 0 through 9 (numbers)
+
+   | Team Name | Location |
+   |-----------|----------|
+   | team1 | eastus |
+   | team2 | eastus2 |
+   | team3 | centralus |
+   ```bash
+      export TEAM_NAME=<team_name>
+      export TEAM_LOCATION=<team_location>
+   ```
 
 ## Steps
 
-> :book: The Contoso Bicycle Azure AD team requires all admin access to AKS clusters be security-group based. This applies to the new Secure AKS cluster that is being built for Application ID a0008 under the BU001 business unit. Kubernetes RBAC will be AAD-backed and access granted based on a user's AAD group membership.
+> :book: The Azure AD team requires all admin access to AKS clusters be security-group based. This applies to the new Secure AKS cluster that is being built for Application ID a0008 under the BU001 business unit. Kubernetes RBAC will be AAD-backed and access granted based on a user's AAD group membership.
 
 1. Query and save your Azure subscription's tenant id.
 
@@ -33,7 +39,9 @@ Following the steps below you will result in an Azure AD configuration that will
    TENANTID_AZURERBAC=$(az account show --query tenantId -o tsv)
    ```
 
-1. Playing the role as the Contoso Bicycle Azure AD team, login into the tenant where Kubernetes Cluster API authorization will be associated with.
+1. Playing the role as the Azure AD team, login into the tenant where Kubernetes Cluster API authorization will be associated with.
+
+   >:exclamation: OCW NOTE: For this exercise ClusterApi tenantId will be same as step 1.
 
    ```bash
    az login -t <Replace-With-ClusterApi-AzureAD-TenantId> --allow-no-subscriptions
@@ -66,16 +74,26 @@ Following the steps below you will result in an Azure AD configuration that will
    ```bash
    az ad group member add -g $AADOBJECTID_GROUP_CLUSTERADMIN --member-id $AADOBJECTID_USER_CLUSTERADMIN
    ```
+    This object ID will be used later while creating the cluster. This way, once the cluster gets deployed the new group will get the proper Cluster Role bindings in Kubernetes. <br/>
+   Add executer to the cluster admin security group.
 
-   This object ID will be used later while creating the cluster. This way, once the cluster gets deployed the new group will get the proper Cluster Role bindings in Kubernetes.
+   ```bash
+   export SIGNEDIN_USER_ID=$(az ad signed-in-user show --query objectId -o tsv)
 
-1. Set up groups to map into other Kubernetes Roles. _Optional, fork required._
+   az ad group member add -g $AADOBJECTID_GROUP_CLUSTERADMIN --member-id $SIGNEDIN_USER_ID
+   ``` 
 
-   > :book: The team knows there will be more than just cluster admins that need group-managed access to the cluster. Out of the box, Kubernetes has other roles like _admin_, _edit_, and _view_ which can also be mapped to Azure AD Groups for use both at namespace and at the cluster level.
 
-   In the [`cluster-rbac.yaml` file](./cluster-manifests/cluster-rbac.yaml) and the various namespaced [`rbac.yaml files`](./cluster-manifests/cluster-baseline-settings/rbac.yaml), you can uncomment what you wish and replace the `<replace-with-an-aad-group-object-id...>` placeholders with corresponding new or existing AD groups that map to their purpose for this cluster or namespace. You do not need to perform this action for this walk through; they are only here for your reference.
 
-   :bulb: Alternatively/Additionally, you can make some of these group associations to [Azure RBAC roles](https://docs.microsoft.com/azure/aks/manage-azure-rbac). At the time of this writing, this feature is still in _preview_. This reference implementation has not been validated with that feature.
+1.    >:exclamation:OCW NOTE: This step is optional.
+   
+      Set up groups to map into other Kubernetes Roles. _Optional, fork required._
+
+      > :book: The team knows there will be more than just cluster admins that need group-managed access to the cluster. Out of the box, Kubernetes has other roles like _admin_, _edit_, and _view_ which can also be mapped to Azure AD Groups for use both at namespace and at the cluster level.
+
+      In the [`cluster-rbac.yaml` file](./cluster-manifests/cluster-rbac.yaml) and the various namespaced [`rbac.yaml files`](./cluster-manifests/cluster-baseline-settings/rbac.yaml), you can uncomment what you wish and replace the `<replace-with-an-aad-group-object-id...>` placeholders with corresponding new or existing AD groups that map to their purpose for this cluster or namespace. You do not need to perform this action for this walk through; they are only here for your reference.
+
+      :bulb: Alternatively/Additionally, you can make some of these group associations to [Azure RBAC roles](https://docs.microsoft.com/azure/aks/manage-azure-rbac). At the time of this writing, this feature is still in _preview_. This reference implementation has not been validated with that feature.
 
 ### Next step
 
