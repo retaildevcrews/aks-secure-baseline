@@ -78,7 +78,7 @@ The following two resource groups will be created and populated with networking 
    RESOURCEID_VNET_HUB=$(az deployment group show -g rg-enterprise-networking-hubs-$TEAM_NAME -n hub-default --query properties.outputs.hubVnetId.value -o tsv)
 
    # [This takes about five minutes to run.]
-   az deployment group create -g rg-enterprise-networking-spokes-$TEAM_NAME -f networking/spoke-BU0001A0008.json -p location=$TEAM_LOCATION hubVnetResourceId="${RESOURCEID_VNET_HUB}"
+   az deployment group create -g rg-enterprise-networking-spokes-$TEAM_NAME -f networking/spoke-BU0001A0008.json -p location=$TEAM_LOCATION teamName=$TEAM_NAME $hubVnetResourceId="${RESOURCEID_VNET_HUB}"
    ```
 
    The spoke creation will emit the following:

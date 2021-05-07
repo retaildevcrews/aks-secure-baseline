@@ -97,6 +97,9 @@
         "kubernetesVersion": {
             "defaultValue": "1.20.2",
             "type": "string"
+        },
+        "teamName": {
+            "type": "string"
         }
     },
     "variables": {
@@ -479,7 +482,7 @@
                         "name": "apw-frontend-ip-configuration",
                         "properties": {
                             "PublicIPAddress": {
-                                "id": "[resourceId(subscription().subscriptionId, variables('vNetResourceGroup'), 'Microsoft.Network/publicIpAddresses', 'pip-BU0001A0008-00')]"
+                                "id": "[resourceId(subscription().subscriptionId, variables('vNetResourceGroup'), 'Microsoft.Network/publicIpAddresses', '[concat('pip-BU0001A0008-00', parameters('teamName')]')]"
                             }
                         }
                     }
