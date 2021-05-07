@@ -27,6 +27,8 @@ The following two resource groups will be created and populated with networking 
 
 ## Steps
 
+> TODO: Do we need to login again if using the same user?
+
 1. Login into the Azure subscription that you'll be deploying into.
 
    > :book: The networking team logins into the Azure subscription that will contain the regional hub. At Contoso Bicycle, all of their regional hubs are in the same, centrally-managed subscription.
