@@ -17,9 +17,6 @@
     "k8sControlPlaneAuthorizationTenantId": {
       "value": "[guid--your-cluster-APIs-authorization-tenant-ID]"
     },
-    "appGatewayListenerCertificate": {
-      "value": "[base64 cert data]"
-    },
     "aksIngressControllerCertificate": {
       "value": "[base64 public cert data]"
     },

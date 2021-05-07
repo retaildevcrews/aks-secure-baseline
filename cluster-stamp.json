@@ -21,12 +21,6 @@
                 "description": "Your AKS control plane Cluster API authentication tenant"
             }
         },
-        "appGatewayListenerCertificate": {
-            "type": "string",
-            "metadata": {
-                "description": "The certificate data for app gateway TLS termination. It is base64"
-            }
-        },
         "aksIngressControllerCertificate": {
             "type": "string",
             "metadata": {
@@ -129,7 +123,7 @@
         "clusterControlPlaneIdentityName": "[concat('mi-', variables('clusterName'), '-controlplane')]",
 
         "keyVaultName": "[concat('kv-', variables('clusterName'))]",
-
+        
         "policyResourceIdAKSLinuxRestrictive": "/providers/Microsoft.Authorization/policySetDefinitions/42b8ef37-b724-4e24-bbc8-7a7708edfe00",
         "policyResourceIdEnforceHttpsIngress": "/providers/Microsoft.Authorization/policyDefinitions/1a5b4dca-0b6f-4cf5-907c-56316bc1bf3d",
         "policyResourceIdEnforceInternalLoadBalancers": "/providers/Microsoft.Authorization/policyDefinitions/3fc4dc25-5baf-40d8-9b05-7fe74c1bc64e",
@@ -223,19 +217,7 @@
                 {
                     "type": "secrets",
                     "apiVersion": "2019-09-01",
-                    "name": "sslcert",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName') )]"
-                    ],
-                    "properties": {
-                        "value": "[parameters('appGatewayListenerCertificate')]",
-                        "recoveryLevel": "Purgeable"
-                    }
-                },
-                {
-                    "type": "secrets",
-                    "apiVersion": "2019-09-01",
-                    "name": "appgw-ingress-internal-aks-ingress-contoso-com-tls",
+                    "name": "appgw-ingress-internal-aks-ingress-aks-sb-com-tls",
                     "dependsOn": [
                         "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
                     ],
@@ -387,7 +369,7 @@
         {
             "type": "Microsoft.Network/privateDnsZones",
             "apiVersion": "2018-09-01",
-            "name": "aks-ingress.contoso.com",
+            "name": "aks-ingress.aks-sb.com",
             "location": "global",
             "properties": {},
             "resources": [
@@ -396,7 +378,7 @@
                     "apiVersion": "2018-09-01",
                     "name": "bu0001a0008-00",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.contoso.com')]"
+                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.aks-sb.com')]"
                     ],
                     "properties": {
                         "ttl": 3600,
@@ -413,7 +395,7 @@
                     "name": "[concat('to_', variables('vnetName'))]",
                     "location": "global",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.contoso.com')]"
+                        "[resourceId('Microsoft.Network/privateDnsZones', 'aks-ingress.aks-sb.com')]"
                     ],
                     "properties": {
                         "virtualNetwork": {
@@ -435,7 +417,8 @@
             "identity": {
                 "type": "UserAssigned",
                 "userAssignedIdentities": {
-                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',  'mi-appgateway-frontend')]": {}
+                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities',  'mi-appgateway-frontend')]": {},
+                    "/subscriptions/9b3afdd0-1f5f-4b45-ac30-02f377b9db92/resourceGroups/TLD/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mi-kv-tld" : {}
                 }
             },
             "zones": [
@@ -458,9 +441,9 @@
                 },
                 "trustedRootCertificates": [
                     {
-                        "name": "root-cert-wildcard-aks-ingress-contoso",
+                        "name": "root-cert-wildcard-aks-ingress-aks-sb",
                         "properties": {
-                            "keyVaultSecretId": "[concat(reference(variables('keyVaultName')).vaultUri,'secrets/appgw-ingress-internal-aks-ingress-contoso-com-tls')]"
+                            "keyVaultSecretId": "[concat(reference(variables('keyVaultName')).vaultUri,'secrets/appgw-ingress-internal-aks-ingress-aks-sb-com-tls')]"
                         }
                     }
                 ],
@@ -507,13 +490,13 @@
                     {
                         "name": "[concat(variables('agwName'), '-ssl-certificate')]",
                         "properties": {
-                            "keyVaultSecretId": "[concat(reference(variables('keyVaultName')).vaultUri,'secrets/sslcert')]"
+                            "keyVaultSecretId": "[concat('/subscriptions/9b3afdd0-1f5f-4b45-ac30-02f377b9db92/resourceGroups/TLD/providers/Microsoft.KeyVault/vaults/kv-tld/','secrets/aks-sb5f3a1f3b-6536-48c1-b77c-e934f96fdfc8')]"
                         }
                     }
                 ],
                 "probes": [
                     {
-                        "name": "probe-bu0001a0008-00.aks-ingress.contoso.com",
+                        "name": "probe-bu0001a0008-00.aks-ingress.aks-sb.com",
                         "properties": {
                             "protocol": "Https",
                             "path": "/favicon.ico",
@@ -529,11 +512,11 @@
                 ],
                 "backendAddressPools": [
                     {
-                        "name": "bu0001a0008-00.aks-ingress.contoso.com",
+                        "name": "bu0001a0008-00.aks-ingress.aks-sb.com",
                         "properties": {
                             "backendAddresses": [
                                 {
-                                    "fqdn": "bu0001a0008-00.aks-ingress.contoso.com"
+                                    "fqdn": "bu0001a0008-00.aks-ingress.aks-sb.com"
                                 }
                             ]
                         }
@@ -541,7 +524,7 @@
                 ],
                 "backendHttpSettingsCollection": [
                     {
-                        "name": "aks-ingress-contoso-backendpool-httpsettings",
+                        "name": "aks-ingress-aks-sb-backendpool-httpsettings",
                         "properties": {
                             "port": 443,
                             "protocol": "Https",
@@ -549,11 +532,11 @@
                             "pickHostNameFromBackendAddress": true,
                             "requestTimeout": 20,
                             "probe": {
-                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/probes/probe-bu0001a0008-00.aks-ingress.contoso.com')]"
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/probes/probe-bu0001a0008-00.aks-ingress.aks-sb.com')]"
                             },
                             "trustedRootCertificates": [
                                 {
-                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/trustedRootCertificates/root-cert-wildcard-aks-ingress-contoso')]"
+                                    "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('agwName')), '/trustedRootCertificates/root-cert-wildcard-aks-ingress-aks-sb')]"
                                 }
                             ]
                         }
@@ -573,7 +556,7 @@
                             "sslCertificate": {
                                 "id": "[concat(variables('apwResourceId'), '/sslCertificates/', variables('agwName'), '-ssl-certificate')]"
                             },
-                            "hostName": "bicycle.contoso.com",
+                            "hostName": "team1.aks-sb.com",
                             "hostNames": [
                             ],
                             "requireServerNameIndication": true
@@ -589,10 +572,10 @@
                                 "id": "[concat(variables('apwResourceId'), '/httpListeners/listener-https')]"
                             },
                             "backendAddressPool": {
-                                "id": "[concat(variables('apwResourceId'), '/backendAddressPools/bu0001a0008-00.aks-ingress.contoso.com')]"
+                                "id": "[concat(variables('apwResourceId'), '/backendAddressPools/bu0001a0008-00.aks-ingress.aks-sb.com')]"
                             },
                             "backendHttpSettings": {
-                                "id": "[concat(variables('apwResourceId'), '/backendHttpSettingsCollection/aks-ingress-contoso-backendpool-httpsettings')]"
+                                "id": "[concat(variables('apwResourceId'), '/backendHttpSettingsCollection/aks-ingress-aks-sb-backendpool-httpsettings')]"
                             }
                         }
                     }
