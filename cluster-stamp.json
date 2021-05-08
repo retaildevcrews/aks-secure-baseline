@@ -482,7 +482,7 @@
                         "name": "apw-frontend-ip-configuration",
                         "properties": {
                             "PublicIPAddress": {
-                                "id": "[resourceId(subscription().subscriptionId, variables('vNetResourceGroup'), 'Microsoft.Network/publicIpAddresses', '[concat('pip-BU0001A0008-00', parameters('teamName')]')]"
+                                "id": "[resourceId(subscription().subscriptionId, variables('vNetResourceGroup'), 'Microsoft.Network/publicIpAddresses', '[concat('pip-BU0001A0008-00-', parameters('teamName')]')]"
                             }
                         }
                     }

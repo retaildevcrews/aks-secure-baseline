@@ -48,7 +48,7 @@
         "hubLaWorkspaceResourceId": "[resourceId(variables('hubRgName'), 'Microsoft.OperationalInsights/workspaces', variables('hubLaWorkspaceName'))]",
         "toHubPeeringName": "[concat('spoke-to-', variables('hubNetworkName'))]",
 
-        "primaryClusterPipName": "[concat('pip-', variables('orgAppId'), '-00'), parameters('teamName')]"
+        "primaryClusterPipName": "[concat('pip-', variables('orgAppId'), '-00-'), parameters('teamName')]"
     },
     "resources": [
         {

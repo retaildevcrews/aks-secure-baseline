@@ -29,7 +29,7 @@ The following two resource groups will be created and populated with networking 
 
 1. Login into the Azure subscription that you'll be deploying into.
 
-   > :book: The networking team logins into the Azure subscription that will contain the regional hub. For this exercise, all of the regional hubs are in the same, centrally-managed subscription.
+   > :book: The networking team logins into the Azure subscription that will contain the regional hub. For this exercise, regional hub is in the same, centrally-managed subscription as rest of the network.
 
    ```bash
    az login -t $TENANTID_AZURERBAC
