@@ -43,20 +43,6 @@ GitOps allows a team to author Kubernetes manifest files, persist them in their 
 
    Once the authentication happens successfully, some new items will be added to your `kubeconfig` file such as an `access-token` with an expiration period. For more information on how this process works in Kubernetes please refer to [the related documentation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens).
 
-1. Import cluster management images to your container registry.
-
-   > Public container registries are subject to faults such as outages (no SLA) or request throttling. Interruptions like these can be crippling for a system that needs to pull an image _right now_. To minimize the risks of using public registries, store all applicable container images in a registry that you control, such as the SLA-backed Azure Container Registry.
-
-   ```bash
-   # Get your ACR cluster name
-   ACR_NAME=$(az deployment group show -g rg-bu0001a0008-$TEAM_NAME -n cluster-stamp --query properties.outputs.containerRegistryName.value -o tsv)
-
-   # Import cluster management images hosted in public container registries
-   az acr import --source docker.io/library/memcached:1.5.20 -n $ACR_NAME
-   az acr import --source docker.io/fluxcd/flux:1.21.1 -n $ACR_NAME
-   az acr import --source docker.io/weaveworks/kured:1.6.1 -n $ACR_NAME
-   ```
-
 1. Create the cluster baseline settings namespace.
 
    ```bash
@@ -70,22 +56,16 @@ GitOps allows a team to author Kubernetes manifest files, persist them in their 
 
 1. Deploy Flux.
 
-   > If you used your own fork of this GitHub repo, update the [`flux.yaml`](./cluster-manifests/cluster-baseline-settings/flux.yaml) file to **reference your own repo and change the URL below** to point to yours as well. Also, since Flux will begin processing the manifests in [`cluster-manifests/`](./cluster-manifests/) now would be the right time push the following changes to your fork:
-   >
-   > * Update three `image` references to use your container registry instead of public container registries. See the comment in each file for instructions.
-   >   * update the two `image:` values in [`flux.yaml`](./cluster-manifests/cluster-baseline-settings/flux.yaml).
-   >   * update the one `image:` values in [`kured.yaml`](./cluster-manifests/cluster-baseline-settings/kured.yaml).
-
-   :warning: Deploying the flux configuration using the `flux.yaml` file unmodified from this repo will be deploying your cluster to take dependencies on public container registries. This is generally okay for exploratory/testing, but not suitable for production. Before going to production, ensure _all_ image references you bring to your cluster are from _your_ container registry (as imported in the prior step) or another that you feel confident relying on.
+   :warning: Deploying the flux configuration using the `flux.yaml` file unmodified from this repo will be deploying your cluster to take dependencies on public container registries. This is generally okay for exploratory/testing, but not suitable for production. Before going to production, ensure _all_ image references you bring to your cluster are from _your_ container registry or another that you feel confident relying on.
 
    ```bash
-   kubectl create -f https://raw.githubusercontent.com/mspnp/aks-secure-baseline/main/cluster-manifests/cluster-baseline-settings/flux.yaml
+   kubectl apply -f ./ci-cd/flux/flux.yaml
    ```
 
 1. Wait for Flux to be ready before proceeding.
 
    ```bash
-   kubectl wait -n cluster-baseline-settings --for=condition=ready pod --selector=app.kubernetes.io/name=flux --timeout=90s
+   kubectl wait -n flux-cd --for=condition=ready pod --selector=app.kubernetes.io/name=flux --timeout=90s
    ```
 
 Generally speaking, this will be the last time you should need to use `kubectl` for day-to-day configuration operations on this cluster (outside of break-fix situations). Between ARM for Azure Resource definitions and the application of manifests via Flux, all normal configuration activities can be performed without the need to use `kubectl`. You will however see us use it for the upcoming workload deployment. This is because the SDLC component of workloads are not in scope for this reference implementation, as this is focused the infrastructure and baseline configuration.
