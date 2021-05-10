@@ -59,7 +59,7 @@ GitOps allows a team to author Kubernetes manifest files, persist them in their 
    :warning: Deploying the flux configuration using the `flux.yaml` file unmodified from this repo will be deploying your cluster to take dependencies on public container registries. This is generally okay for exploratory/testing, but not suitable for production. Before going to production, ensure _all_ image references you bring to your cluster are from _your_ container registry or another that you feel confident relying on.
 
    ```bash
-   kubectl apply -f https://raw.githubusercontent.com/retaildevcrews/aks-secure-baseline/main/ci-cd/flux/flux.yaml
+   kubectl apply -f ./ci-cd/flux/flux.yaml
    ```
 
 1. Wait for Flux to be ready before proceeding.

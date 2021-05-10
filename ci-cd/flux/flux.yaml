@@ -60,6 +60,7 @@ spec:
         prometheus.io/port: "3031"
       labels:
         app.kubernetes.io/name: flux
+        app: flux
     spec:
       nodeSelector:
         kubernetes.io/os: linux
